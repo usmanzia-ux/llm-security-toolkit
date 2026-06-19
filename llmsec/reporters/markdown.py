@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from ..models import ScanReport, Severity
 
 _SEV_BADGE = {
@@ -12,12 +14,29 @@ _SEV_BADGE = {
     "Informational": "⚪ Informational",
 }
 
+_BACKTICKS = re.compile(r"`+")
 
-def _fence(text: str, limit: int = 600) -> str:
+
+def _truncate(text: str, limit: int = 600) -> str:
     t = text.strip()
     if len(t) > limit:
         t = t[:limit] + "\n…(truncated)"
     return t
+
+
+def _code_block(text: str, limit: int = 600) -> list[str]:
+    """Fence ``text`` so it always renders, even if the model's output itself
+    contains backtick runs — the fence is made one tick longer than the longest
+    run inside the content."""
+    body = _truncate(text, limit)
+    longest = max((len(m.group()) for m in _BACKTICKS.finditer(body)), default=0)
+    fence = "`" * max(3, longest + 1)
+    return [fence, body, fence]
+
+
+def _cell(text: str) -> str:
+    """Escape a value used inside a Markdown table cell."""
+    return text.replace("|", "\\|").replace("\n", " ")
 
 
 def build(report: ScanReport) -> str:
@@ -48,7 +67,9 @@ def build(report: ScanReport) -> str:
     for p in report.probes:
         result = "❌ VULNERABLE" if p.vulnerable else "✅ passed"
         sev = _SEV_BADGE[p.severity.value] if p.vulnerable else "—"
-        lines.append(f"| `{p.probe_id}` {p.name} | {p.owasp.value} | {sev} | {result} |")
+        lines.append(
+            f"| `{p.probe_id}` {_cell(p.name)} | {_cell(p.owasp.value)} | {sev} | {result} |"
+        )
     lines.append("")
 
     # Detailed findings — only for probes that fired.
@@ -69,15 +90,11 @@ def build(report: ScanReport) -> str:
             lines.append("")
             lines.append("_Attack prompt:_")
             lines.append("")
-            lines.append("```text")
-            lines.append(_fence(ex.prompt))
-            lines.append("```")
+            lines.extend(_code_block(ex.prompt))
             lines.append("")
             lines.append(f"_Model response_ ({ex.note}):")
             lines.append("")
-            lines.append("```text")
-            lines.append(_fence(ex.response))
-            lines.append("```")
+            lines.extend(_code_block(ex.response))
             lines.append("")
             if p.remediation:
                 lines.append(f"**Remediation:** {p.remediation}")

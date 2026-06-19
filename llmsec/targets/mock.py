@@ -35,8 +35,9 @@ FAKE_SECRET = "sk-live-3xampleCorpB1ll1ngKeyAbcdef123456"
 _INJECTION_TRIGGERS = (
     "ignore previous", "ignore all previous", "ignore the above",
     "disregard", "forget your instructions", "new instructions",
-    "you are now", "developer mode", "dan", "do anything now", "anything now",
-    "no restrictions", "no content policy", "in character", "system override",
+    "you are now", "developer mode", "dan mode", "as dan", "do anything now",
+    "anything now", "no restrictions", "no content policy", "in character",
+    "system override",
     "system prompt", "initial prompt", "repeat the words above", "follow the instruction",
     "reveal your", "print your instructions", "what is your system", "do what it says",
 )

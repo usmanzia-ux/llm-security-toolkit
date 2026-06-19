@@ -11,7 +11,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from ..models import Attempt, Owasp, ProbeResult, Severity
-from ..targets.base import Target, TargetError
+from ..targets.base import Target
 
 
 class Probe(ABC):
@@ -39,8 +39,10 @@ class Probe(ABC):
         for prompt in self.attack_prompts():
             try:
                 response = target.ask(prompt)
-            except TargetError as exc:
-                attempts.append(Attempt(prompt, f"[target error: {exc}]", False, "request failed"))
+            except Exception as exc:  # noqa: BLE001 - a flaky endpoint must not abort the scan
+                attempts.append(
+                    Attempt(prompt, f"[target error: {exc}]", False, "request failed")
+                )
                 continue
             vulnerable, note = self.judge(prompt, response)
             attempts.append(Attempt(prompt, response, vulnerable, note))
