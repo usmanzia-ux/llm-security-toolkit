@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual envs
+.venv/
+venv/
+
+# Generated reports
+llmsec_report.*
+*.report.md
+*.report.json
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Never commit real engagement data or API keys
+.env
+*.key
+client_*/

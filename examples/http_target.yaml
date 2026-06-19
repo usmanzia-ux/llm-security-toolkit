@@ -1,0 +1,18 @@
+# Example config for the generic `http` target backend.
+# Point llmsec at any chatbot endpoint:
+#
+#   llmsec --target http --config examples/http_target.yaml
+#
+# The scanner substitutes {{prompt}} into body_template (already JSON-escaped),
+# POSTs it, then extracts the reply with response_path (a dotted path into the
+# JSON response; list indices are allowed, e.g. choices.0.message.content).
+
+label: "my-chatbot (staging)"
+url: "https://staging.example.com/api/chat"
+method: POST
+headers:
+  Content-Type: application/json
+  Authorization: "Bearer REPLACE_ME"
+body_template: '{"message": "{{prompt}}", "session": "llmsec-scan"}'
+response_path: "data.reply"
+timeout: 60
